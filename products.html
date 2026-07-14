@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - ShopEasy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h2>ShopEasy</h2>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html" class="active">Products</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                </ul>
+            </div>
+            <div class="header-icons">
+                <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+                <a href="#"><i class="fas fa-user"></i></a>
+                <div class="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Products Page -->
+    <section class="products-page">
+        <div class="container">
+            <div class="products-header">
+                <h2>All Products</h2>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search products...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            
+            <div class="category-filters">
+                <button class="category-filter active" data-category="All">All</button>
+                <button class="category-filter" data-category="Electronics">Electronics</button>
+                <button class="category-filter" data-category="Fashion">Fashion</button>
+                <button class="category-filter" data-category="Home">Home & Kitchen</button>
+                <button class="category-filter" data-category="Beauty">Beauty</button>
+            </div>
+            
+            <div class="products-container" id="products-container">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>ShopEasy</h3>
+                <p>Your one-stop destination for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="#">About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> Kathmandu, Nepal</li>
+                    <li><i class="fas fa-phone"></i> +977 9876543210</li>
+                    <li><i class="fas fa-envelope"></i> info@shopeasy.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 ShopEasy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Load all products when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllProducts();
+            
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    searchProducts(this.value);
+                });
+            }
+            
+            // Category filter functionality
+            const categoryButtons = document.querySelectorAll('.category-filter');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Filter products by category
+                    const category = this.getAttribute('data-category');
+                    filterByCategory(category);
+                });
+            });
+        });
+        
+        // Load all products
+        function loadAllProducts() {
+            const productsContainer = document.getElementById('products-container');
+            if (!productsContainer) return;
+            
+            productsContainer.innerHTML = products.map(product => `
+                <div class="product-card" data-id="${product.id}">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price.toFixed(2)}</p>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Search products function
+        function searchProducts(query) {
+            const filteredProducts = products.filter(product => 
+                product.name.toLowerCase().includes(query.toLowerCase()) ||
+                product.description.toLowerCase().includes(query.toLowerCase()) ||
+                product.category.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            displayProducts(filteredProducts);
+        }
+        
+        // Filter by category function
+        function filterByCategory(category) {
+            if (category === 'All') {
+                displayProducts(products);
+            } else {
+                const filteredProducts = products.filter(product => product.category === category);
+                displayProducts(filteredProducts);
+            }
+        }
+        
+        // Display products function
+        function displayProducts(productsToDisplay) {
+            const productsContainer = document.getElementById('products-container');
+            if (!productsContainer) return;
+            
+            if (productsToDisplay.length === 0) {
+                productsContainer.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-search"></i>
+                        <h3>No products found</h3>
+                        <p>Try adjusting your search or filter criteria</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            productsContainer.innerHTML = productsToDisplay.map(product => `
+                <div class="product-card" data-id="${product.id}">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price.toFixed(2)}</p>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

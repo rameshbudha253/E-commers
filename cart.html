@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - ShopEasy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h2>ShopEasy</h2>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="cart.html" class="active">Cart</a></li>
+                </ul>
+            </div>
+            <div class="header-icons">
+                <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+                <a href="#"><i class="fas fa-user"></i></a>
+                <div class="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cart Page -->
+    <section class="cart-page">
+        <div class="container">
+            <h2>Your Shopping Cart</h2>
+            <div class="cart-container">
+                <div class="cart-items" id="cart-items">
+                    <!-- Cart items will be loaded here by JavaScript -->
+                </div>
+                <div class="cart-summary" id="cart-summary">
+                    <!-- Cart summary will be loaded here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>ShopEasy</h3>
+                <p>Your one-stop destination for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="#">About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> kailali, Nepal</li>
+                    <li><i class="fas fa-phone"></i> +977 9766967836</li>
+                    <li><i class="fas fa-envelope"></i> info@shopeasy.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 ShopEasy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Load cart when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            loadCart();
+
+            // Event listener for cart updates
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('increase-quantity')) {
+                    const productId = e.target.getAttribute('data-id');
+                    updateQuantity(productId, 1);
+                }
+
+                if (e.target.classList.contains('decrease-quantity')) {
+                    const productId = e.target.getAttribute('data-id');
+                    updateQuantity(productId, -1);
+                }
+
+                if (e.target.classList.contains('remove-item')) {
+                    const productId = e.target.getAttribute('data-id');
+                    removeFromCart(productId);
+                }
+
+                if (e.target.classList.contains('checkout-button')) {
+                    checkout();
+                }
+            });
+        });
+
+        // Load cart function
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartSummaryContainer = document.getElementById('cart-summary');
+
+            if (!cartItemsContainer || !cartSummaryContainer) return;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Your cart is empty</h3>
+                        <p>Looks like you haven't added any items to your cart yet</p>
+                        <a href="products.html" class="cta-button">Continue Shopping</a>
+                    </div>
+                `;
+                cartSummaryContainer.innerHTML = `
+                    <h3>Order Summary</h3>
+                    <div class="summary-item">
+                        <span>Subtotal</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span>$0.00</span>
+                    </div>
+                    <button class="checkout-button" disabled>Proceed to Checkout</button>
+                `;
+                return;
+            }
+
+            // Display cart items
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="cart-item" data-id="${item.id}">
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-details">
+                        <h3>${item.name}</h3>
+                        <p>$${item.price.toFixed(2)}</p>
+                        <div class="cart-item-controls">
+                            <button class="decrease-quantity" data-id="${item.id}">-</button>
+                            <input type="number" value="${item.quantity}" min="1" data-id="${item.id}" class="quantity-input">
+                            <button class="increase-quantity" data-id="${item.id}">+</button>
+                        </div>
+                    </div>
+                    <button class="remove-item" data-id="${item.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            // Calculate totals
+            const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const total = subtotal; // Free shipping
+
+            // Display cart summary
+            cartSummaryContainer.innerHTML = `
+                <h3>Order Summary</h3>
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span>FREE</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>$${total.toFixed(2)}</span>
+                </div>
+                <button class="checkout-button">Proceed to Checkout</button>
+            `;
+        }
+
+        // Update quantity function
+        function updateQuantity(productId, change) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const productIndex = cart.findIndex(item => item.id == productId);
+
+            if (productIndex > -1) {
+                cart[productIndex].quantity += change;
+
+                // Remove item if quantity is 0 or less
+                if (cart[productIndex].quantity <= 0) {
+                    cart.splice(productIndex, 1);
+                }
+
+                // Save updated cart
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // Reload cart display
+                loadCart();
+
+                // Update cart icon
+                updateCartIcon();
+            }
+        }
+
+        // Remove from cart function
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.id != productId);
+
+            // Save updated cart
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Reload cart display
+            loadCart();
+
+            // Update cart icon
+            updateCartIcon();
+        }
+
+        // Checkout function
+        function checkout() {
+            alert('Thank you for your order! This is a demo, so no actual purchase was made.');
+            localStorage.removeItem('cart');
+            loadCart();
+            updateCartIcon();
+        }
+    </script>
+</body>
+
+</html>
